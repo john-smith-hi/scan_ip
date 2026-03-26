@@ -1,0 +1,5 @@
+Nhớ cập nhật README.md để hướng dẫn cách dùng
+Nhớ cập nhật structure.txt để dễ 
+Code Go thì nằm trong main
+Đọc cấu trúc database hiện tại
+Đọc trong file task việc nào xong thì ghi chữ XONG ở cuối task

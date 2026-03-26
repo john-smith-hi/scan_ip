@@ -1,0 +1,27 @@
+Tool sử dụng trong dự án:
+
+1. Go (Golang)
+   - Ngôn ngữ lập trình chính
+   - Sử dụng goroutine để quét song song
+   - Yêu cầu: Go 1.21+
+
+2. Masscan
+   - Quét cổng IP tốc độ cao
+   - Output JSON để Go parse
+   - Yêu cầu quyền root/Administrator
+   - Cài đặt:
+     + Linux:   sudo apt install masscan
+     + macOS:   brew install masscan
+     + Windows: choco install masscan hoặc tải từ GitHub
+
+3. MariaDB 10.11+
+   - Lưu trữ dữ liệu IP, host, dịch vụ
+   - Driver Go: github.com/go-sql-driver/mysql
+   - Cài đặt:
+     + Linux:   sudo apt install mariadb-server
+     + macOS:   brew install mariadb
+     + Windows: choco install mariadb hoặc tải từ mariadb.org
+
+Kiểm tra tool:
+   Chạy lệnh: go run ./main check
+   → Tự động kiểm tra masscan và MariaDB có sẵn trong hệ thống.

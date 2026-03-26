@@ -1,0 +1,23 @@
+scan_ip/
+├── config/
+│   └── database.txt          # Cấu hình kết nối MariaDB
+├── data/                      # Thư mục chứa file IP (CIDR)
+│   └── vietnam.txt            # Dải IP Việt Nam
+├── backup_database/           # Lưu trữ các bản sao lưu (.sql.gz)
+├── main/
+│   ├── main.go                # Entrypoint (check, init, import, scan, reset-scan, backup, restore)
+│   └── internal/
+│       ├── config.go          # Đọc config database từ file text
+│       ├── db.go              # Kết nối DB, tạo bảng, hàm ResetScanData
+│       ├── importer.go        # Đọc CIDR, parse IP, batch insert
+│       ├── masscan.go         # Wrapper gọi masscan, parse JSON, xử lý cổng 80,443,8080
+│       ├── scanner.go         # Lọc IP chưa quét, Worker pool, Batch Update
+│       └── toolcheck.go       # Kiểm tra cài đặt masscan, mariadb đa nền tảng
+├── database                   # SQL schema MariaDB
+├── go.mod                     # Go module
+├── README.md                  # Hướng dẫn sử dụng
+├── note.txt                   # Ghi chú phát triển
+├── structure.txt              # Cấu trúc thư mục (file này)
+├── summary.txt                # Mô tả tổng quan dự án
+├── task.txt                   # Danh sách task
+└── tool.txt                   # Danh sách công cụ sử dụng

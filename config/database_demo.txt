@@ -1,0 +1,8 @@
+# Cấu hình kết nối MariaDB
+# Định dạng: key = value
+
+host = 192.168.1.100
+port = 3306
+user = root
+password =
+dbname = scan_ip

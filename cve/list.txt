@@ -1,0 +1,23 @@
+1. ThinkPHP — TOP 1 VN
+    CVE-2018-20062
+    CVE-2019-9082
+2. Laravel Debug RCE
+    CVE-2021-3129
+3. Log4Shell
+    CVE-2021-44228
+4. Confluence RCE
+    CVE-2022-26134
+5. WebLogic
+    CVE-2020-14882
+6. Hikvision / Camera
+    CVE-2021-36260
+7. WordPress plugin RCE
+    CVE-2020-25213
+    nhiều plugin khác
+8. Joomla / CMS cũ
+    nhiều RCE/LFI cũ
+9. Redis exposed
+    CVE-2022-0543
+    hoặc không auth
+10. Tomcat PUT RCE
+    CVE-2017-12615

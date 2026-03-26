@@ -1,0 +1,37 @@
+Scan IP Toolkit - Báo Cáo Tổng Quan & Hướng Dẫn Nâng Cấp Tương Lai
+=====================================================================
+
+1. MỤC TIÊU DỰ ÁN
+Toolkit được thiết kế để quét và thu thập dữ liệu về host (trạng thái sống/chết) và dịch vụ (cổng mở, banner) trên quy mô lớn (ví dụ: quét 16.6 triệu IP của Việt Nam).
+
+2. KIẾN TRÚC & LUỒNG DỮ LIỆU (DATA FLOW)
+- Phase 1 (Import): Đọc file CIDR (data/vietnam.txt), chuyển đổi thành IP tĩnh. Sử dụng kỹ thuật Batch Insert (10.000 IP/lần) để đẩy nhanh tốc độ chèn vào MariaDB, tránh lỗi quá tải RAM hay giới hạn placeholder của MySQL.
+- Phase 2 (Scan): 
+  + Lọc thông minh: Chỉ lấy các IP có `last_scan IS NULL` để quét (tránh quét lại).
+  + Quét tốc độ cao: 
+    * Mặc định (Alive Check): Dùng kỹ thuật gửi đồng thời ICMP Ping + TCP SYN (80, 443, 8080) thông qua Masscan để xác định IP sống siêu tốc.
+    * Quét cổng: Dùng Masscan chỉ định dải cổng.
+  + Cập nhật dữ liệu: Kết quả trả về (JSON) được parse an toàn. Các IP sau đó được phân loại Sống/Chết và dùng kỹ thuật Batch Update (chuỗi `IN (?,?,...)`) để cập nhật hàng loạt trạng thái vào MariaDB chỉ bằng một câu Query.
+
+3. TỐI ƯU HÓA HIỆU NĂNG ĐÃ THỰC HIỆN
+- Thay vì dùng thư viện `net` của Go mở từng Connection (quá chậm và ngốn tài nguyên), hệ thống bọc (wrapper) lệnh `masscan` (công cụ quét nhanh nhất hiện nay).
+- Mọi tương tác với MariaDB (Insert, Update) đều được gộp (Batching) theo block 10.000 records.
+- Loại bỏ parse JSON nguyên khối chứa rác từ Masscan, chuyển sang parse từng dòng `{...}` an toàn.
+- Khả năng Reset (`reset-scan`) an toàn với xác nhận 2 lớp.
+- Tính năng Sao lưu (`backup`) nén Gzip giúp bảo vệ dữ liệu quy mô lớn.
+
+4. HƯỚNG DẪN NÂNG CẤP TRONG TƯƠNG LAI
+Hệ thống hiện tại đóng vai trò là "Reconnaissance Layer" (Lớp thu thập thông tin). Để phát triển tiếp:
+
+* Hướng nâng cấp 1: CVE Scanner / Vulnerability Assessment
+  - Tạo thêm bảng `vulnerabilities (id, host_id, service_id, cve_id, description, severity, status)`.
+  - Viết module mới: `internal/cve_scanner.go`.
+  - Luồng mới: `SELECT * FROM services WHERE state='open';` -> Đưa vào Worker Pool -> Dùng Nuclei hoặc code Go tùy chỉnh gửi payload khai thác (HTTP/SSH/FTP) -> Lưu kết quả vào bảng `vulnerabilities`.
+  - Tích hợp thành sub-command mới trong main.go: `go run ./main exploit`.
+
+* Hướng nâng cấp 2: Phân tích Banner & Nhận dạng công nghệ (Fingerprinting)
+  - Hiện tại bảng `services` có cột `banner`. Cần lấy data từ cột này, dùng regex hoặc wappalyzer-go để đoán tên phần mềm (Apache, Nginx, WordPress...).
+
+* Hướng nâng cấp 3: Giao diện Web (Dashboard)
+  - Viết thêm 1 sub-command khởi chạy HTTP Server ( Fiber / Gin ).
+  - Trích xuất dữ liệu từ MariaDB ra biểu đồ thống kê: ISP nào có nhiều IP sống nhất, cổng nào mở nhiều nhất.

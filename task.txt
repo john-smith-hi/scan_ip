@@ -1,0 +1,9 @@
+Task:
+    1. Cập nhật đầy đủ mọi thứ còn thiếu cho cấu trúc ban đầu - XONG
+    2. Hãy dựa vào data/vietnam.txt để truyền vào database - XONG
+    3. Bổ sung tính năng scan không quét lại các IP last_scan khác null -XONG
+    4. Viết chức năng đảo ngược database của scan - XONG
+    5. Bổ sung reset-scan : thêm việc liệt kê ra các bảng nào, phần nào sẽ xóa và hỏi lại người dùng chắc muốn xóa không để xác nhận nhiều lần  - XONG
+    6. Thêm tính năng nén, giải nén toàn bộ database vào backup_database - XONG
+    7. Thực hiện scan toàn bộ các host đã được cung cấp để kiểm tra hosts nào sống
+    8. Dựa trên các hosts đã kiểm tra sống, quét các ports 80,443,8080,23,37777,554,81,8888,3389,445,6379,2375
