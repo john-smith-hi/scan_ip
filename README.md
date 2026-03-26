@@ -60,22 +60,28 @@ File CIDR có định dạng mỗi dòng 1 dải, ví dụ:
 
 ### Quét IP (Scan)
 
-Mặc định lệnh `scan` sẽ lấy các IP chưa bao giờ được quét (`last_scan IS NULL`) từ database:
+Lệnh `scan` sẽ tự động chọn công cụ quét dựa trên tham số truyền vào (**Hybrid Mode**):
 
-```bash
-# 1. Chế độ mặc định: Alive Check (80/443 + ICMP)
-# Tự động dùng -p80,443 --ping, cực nhanh để phát hiện host online.
-go run ./main scan -limit 10000 -rate 5000
+1.  **Chế độ Alive Check (Mặc định - Masscan):**
+    *   Sử dụng khi **KHÔNG** truyền `-ports`.
+    *   Tự động quét các cổng phổ biến (`21,22,80,443,445,6379,7001,8080,8443,9200`) với `--rate 3000`.
+    *   Mục đích: Tìm IP đang sống cực nhanh.
+    ```bash
+    go run ./main scan -limit 1000
+    ```
 
-# 2. Chế độ quét cổng (SYN Scan)
-# Quét dải cổng cụ thể để tìm dịch vụ mở.
-go run ./main scan -ports "22,80,443,3306" -limit 1000 -rate 2000
-```
+2.  **Chế độ Port Scan (Nmap):**
+    *   Sử dụng khi **CÓ** truyền tham số `-ports`.
+    *   Sử dụng **Nmap** (`-sS -Pn -n -T3`) để quét chính xác các cổng yêu cầu.
+    *   Mục đích: Quét sâu, tránh ồn ào (stealthy).
+    ```bash
+    go run ./main scan -limit 100 -ports 80,443,8080
+    ```
 
 **Tham số:**
 - `-limit`: Số lượng IP tối đa quét mỗi lần (mặc định: 100,000).
-- `-ports`: Dải cổng (mặc định: TRỐNG -> sẽ chạy Alive Check 80, 443 + Ping).
-- `-rate`: Tốc độ masscan (mặc định: 1000).
+- `-ports`: Dải cổng (mặc định: TRỐNG -> dùng Masscan Alive Check).
+- `-rate`: Tốc độ masscan (mặc định: 3000).
 - `-workers`: Số worker pool chạy song song (mặc định: 10).
 
 > ⚠️ Masscan yêu cầu quyền **root/sudo** (Linux) hoặc **Administrator** (Windows).

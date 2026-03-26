@@ -21,7 +21,15 @@ Tool sử dụng trong dự án:
      + Linux:   sudo apt install mariadb-server
      + macOS:   brew install mariadb
      + Windows: choco install mariadb hoặc tải từ mariadb.org
+4. Nmap 7.9+
+   - Quét cổng chi tiết (Port Scan) ở chế độ Stealth (-sS)
+   - Yêu cầu: Nmap cài đặt trên hệ thống
+   - Cài đặt:
+     + Linux:   sudo apt install nmap
+     + macOS:   brew install nmap
+     + Windows: Tải từ nmap.org
 
-Kiểm tra tool:
-   Chạy lệnh: go run ./main check
-   → Tự động kiểm tra masscan và MariaDB có sẵn trong hệ thống.
+Kiểm tra và Tự động Cài đặt:
+   Chạy lệnh: ./scan_ip check
+   → Tool sẽ tự động kiểm tra: masscan, nmap, mysql, mysqldump.
+   → Đặc biệt trên Linux: Nếu thiếu tool, hệ thống sẽ hỏi và hỗ trợ TỰ ĐỘNG CÀI ĐẶT cho bạn.

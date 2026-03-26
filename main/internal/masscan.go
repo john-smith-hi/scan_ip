@@ -44,8 +44,8 @@ func RunMasscan(targets []string, ports string, rate int) ([]MasscanResult, erro
 	}
 
 	if ports == "" {
-		// Ở chế độ "alive check" mặc định, chúng ta quét cổng 80, 443, 8080 và dùng ICMP ping
-		args = append(args, "-p80,443,8080", "--ping")
+		// Ở chế độ "alive check" mặc định, quét các cổng phổ biến để kiểm tra cấu hình
+		args = append(args, "-p21,22,80,443,445,6379,7001,8080,8443,9200")
 	} else {
 		args = append(args, "-p", ports)
 	}

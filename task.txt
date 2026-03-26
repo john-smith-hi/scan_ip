@@ -5,5 +5,9 @@ Task:
     4. Viết chức năng đảo ngược database của scan - XONG
     5. Bổ sung reset-scan : thêm việc liệt kê ra các bảng nào, phần nào sẽ xóa và hỏi lại người dùng chắc muốn xóa không để xác nhận nhiều lần  - XONG
     6. Thêm tính năng nén, giải nén toàn bộ database vào backup_database - XONG
-    7. Thực hiện scan toàn bộ các host đã được cung cấp để kiểm tra hosts nào sống
-    8. Dựa trên các hosts đã kiểm tra sống, quét các ports 80,443,8080,23,37777,554,81,8888,3389,445,6379,2375
+    7. Sửa lại tính năng scan : - XONG
+        + Nếu chỉ quét để check alive thì dùng masscan dạng 
+            masscan 1.2.3.0/24 -p21,22,80,443,445,6379,7001,8080,8443,9200 --rate 3000
+        + Nếu quét ports cụ thể thì dùng nmap, nhớ kiếm tra người dùng cài đặt chưa và yêu cầu đặt luôn nếu chưa có, đưa vào danh sách kiểm tra tool
+    8. Thực hiện scan toàn bộ các host đã được cung cấp để kiểm tra hosts nào sống
+    9. Dựa trên các hosts đã kiểm tra sống, quét các ports 80,443,8080,23,37777,554,81,8888,3389,445,6379,2375

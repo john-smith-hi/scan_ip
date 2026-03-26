@@ -21,8 +21,8 @@ func DefaultScanConfig() ScanConfig {
 	return ScanConfig{
 		Limit:   100000,
 		Workers: 10,
-		Ports:   "", // Mặc định là chuỗi rỗng -> sẽ dùng --ping (kiểm tra sống/chết)
-		Rate:    1000,
+		Ports:   "", // Mặc định là chuỗi rỗng
+		Rate:    3000,
 	}
 }
 
@@ -100,11 +100,21 @@ func getUnscannedIPs(db *sql.DB, limit int) ([]string, error) {
 	return ips, rows.Err()
 }
 
-// processBatch xử lý một batch IP bằng masscan
+// processBatch xử lý một batch IP bằng masscan hoặc nmap
 func processBatch(db *sql.DB, ips []string, cfg ScanConfig) {
-	results, err := RunMasscan(ips, cfg.Ports, cfg.Rate)
+	var results []MasscanResult
+	var err error
+
+	if cfg.Ports == "" {
+		// Gọi Masscan cho chế độ Alive Check
+		results, err = RunMasscan(ips, cfg.Ports, cfg.Rate)
+	} else {
+		// Gọi Nmap cho chế độ Port Scan
+		results, err = RunNmap(ips, cfg.Ports)
+	}
+
 	if err != nil {
-		log.Printf("Lỗi masscan batch: %v", err)
+		log.Printf("Lỗi scan batch: %v", err)
 		// Đánh dấu đã quét (nhưng không sống) cho tất cả IP trong batch
 		batchUpdateHosts(db, ips, false)
 		return
@@ -115,10 +125,12 @@ func processBatch(db *sql.DB, ips []string, cfg ScanConfig) {
 	for _, r := range results {
 		aliveIPs[r.IP] = true
 
-		// Lưu dịch vụ vào DB
-		for _, port := range r.Ports {
-			if err := insertService(db, r.IP, port.Port, port.Protocol, port.Status); err != nil {
-				log.Printf("Lỗi lưu service %s:%d — %v", r.IP, port.Port, err)
+		// Chỉ lưu dịch vụ vào DB nếu đây là chế độ quét Port cụ thể (không phải Alive Check)
+		if cfg.Ports != "" {
+			for _, port := range r.Ports {
+				if err := insertService(db, r.IP, port.Port, port.Protocol, port.Status); err != nil {
+					log.Printf("Lỗi lưu service %s:%d — %v", r.IP, port.Port, err)
+				}
 			}
 		}
 	}

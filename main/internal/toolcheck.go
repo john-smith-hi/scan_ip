@@ -55,6 +55,13 @@ func GetRequiredTools() []ToolInfo {
 			InstallHint: mariadbInstall,
 			Required:    true,
 		},
+		{
+			Name:        "nmap",
+			Command:     "nmap",
+			VersionFlag: "--version",
+			InstallHint: "sudo apt install nmap",
+			Required:    true,
+		},
 	}
 }
 
@@ -85,6 +92,7 @@ func CheckTool(tool ToolInfo) (installed bool, version string) {
 func CheckAllTools() bool {
 	tools := GetRequiredTools()
 	allOK := true
+	var missingTools []ToolInfo
 
 	fmt.Println("=== Kiểm tra công cụ cần thiết ===")
 	fmt.Println()
@@ -99,6 +107,7 @@ func CheckAllTools() bool {
 			if tool.Required {
 				status = "THIẾU (BẮT BUỘC)"
 				allOK = false
+				missingTools = append(missingTools, tool)
 			}
 			fmt.Printf("  ✗ %-25s : %s\n", tool.Name, status)
 			fmt.Printf("    → Cài đặt: %s\n", tool.InstallHint)
@@ -107,13 +116,54 @@ func CheckAllTools() bool {
 
 	fmt.Println()
 
+	if !allOK && runtime.GOOS == "linux" {
+		fmt.Printf("Phát hiện %d công cụ còn thiếu. Bạn có muốn hệ thống tự động cài đặt không? (y/n): ", len(missingTools))
+		var response string
+		fmt.Scanln(&response)
+		if strings.ToLower(response) == "y" {
+			AutoInstallTools(missingTools)
+			// Kiểm tra lại sau khi cài đặt
+			return CheckAllTools()
+		}
+	}
+
 	if !allOK {
-		log.Println("⚠ Một số công cụ bắt buộc chưa được cài đặt. Vui lòng cài đặt trước khi chạy.")
+		log.Println("⚠ Một số công cụ bắt buộc chưa được cài đặt. Vui lòng cài đặt thủ công trước khi chạy.")
 	} else {
 		fmt.Println("✓ Tất cả công cụ đã sẵn sàng!")
 	}
 
 	return allOK
+}
+
+// AutoInstallTools cố gắng cài đặt các công cụ bị thiếu trên Linux
+func AutoInstallTools(tools []ToolInfo) {
+	fmt.Println("--- Đang bắt đầu quá trình cài đặt tự động ---")
+	for _, tool := range tools {
+		fmt.Printf("Đang cài đặt %s...\n", tool.Name)
+		// Trên Linux (Debian/Kali), chúng ta dùng apt
+		installCmd := ""
+		switch tool.Command {
+		case "masscan":
+			installCmd = "sudo apt update && sudo apt install -y masscan"
+		case "mysql", "mysqldump":
+			installCmd = "sudo apt update && sudo apt install -y mariadb-client mariadb-server"
+		case "nmap":
+			installCmd = "sudo apt update && sudo apt install -y nmap"
+		}
+
+		if installCmd != "" {
+			cmd := exec.Command("bash", "-c", installCmd)
+			output, err := cmd.CombinedOutput()
+			if err != nil {
+				fmt.Printf("  ✗ Lỗi cài đặt %s: %v\n", tool.Name, err)
+				fmt.Printf("    Chi tiết: %s\n", string(output))
+			} else {
+				fmt.Printf("  ✓ Cài đặt %s thành công!\n", tool.Name)
+			}
+		}
+	}
+	fmt.Println("--- Hoàn tất quá trình cài đặt ---")
 }
 
 // CheckMariaDBService kiểm tra MariaDB có đang chạy không bằng cách thử kết nối
